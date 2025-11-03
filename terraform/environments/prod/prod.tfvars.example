@@ -1,0 +1,6 @@
+splunk_hec_token = "replace-with-hec-token"
+splunk_endpoint  = "https://splunk.example.com:8088/services/collector"
+
+spinnaker_principals = ["arn:aws:iam::123456789012:role/SpinnakerInstanceRole"]
+jules_principals     = ["arn:aws:iam::123456789012:role/JulesInstanceRole"]
+fis_principals       = ["arn:aws:iam::123456789012:role/FISTestRole"]
