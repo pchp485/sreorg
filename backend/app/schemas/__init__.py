@@ -36,7 +36,7 @@ class CommandResponse(BaseModel):
     intent: dict | None = None
 
     @classmethod
-    def from_result(cls, result: PipelineResult) -> "CommandResponse":
+    def from_result(cls, result: PipelineResult) -> CommandResponse:
         return cls(
             authorized=result.authorized,
             executed=result.executed,
@@ -67,7 +67,7 @@ class UserOut(BaseModel):
     voice_profiles: int
 
     @classmethod
-    def from_user(cls, user: User) -> "UserOut":
+    def from_user(cls, user: User) -> UserOut:
         return cls(
             id=user.id,
             name=user.name,

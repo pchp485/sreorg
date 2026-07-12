@@ -41,7 +41,10 @@ class Settings(BaseSettings):
     # --- Provider selection -------------------------------------------
     wakeword_provider: Literal["porcupine", "keyword"] = "keyword"
     stt_provider: Literal["whisper", "mock"] = "mock"
-    speaker_provider: Literal["azure", "elevenlabs", "local_ml", "mock"] = "local_ml"
+    # Default to the mock provider so a zero-config local run works end-to-end
+    # (text clients supply the verified speaker). Switch to local_ml/azure/
+    # elevenlabs — which require voice enrollment or cloud keys — for real use.
+    speaker_provider: Literal["azure", "elevenlabs", "local_ml", "mock"] = "mock"
     llm_provider: Literal["openai", "mock"] = "mock"
 
     # --- Wake word -----------------------------------------------------

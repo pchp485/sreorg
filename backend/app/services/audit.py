@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 logger = logging.getLogger("parentai.audit")
@@ -32,7 +32,7 @@ class AuditLog:
         session_id: str | None = None,
     ) -> None:
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "event": event,
             "user_id": user_id,
             "role": role,

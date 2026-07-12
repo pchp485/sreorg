@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -107,7 +107,7 @@ class DeviceCommand:
 class ConversationTurn:
     role: str  # "user" | "assistant" | "system"
     content: str
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 @dataclass

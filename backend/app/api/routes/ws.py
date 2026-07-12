@@ -37,10 +37,11 @@ async def ws_voice(websocket: WebSocket) -> None:
             result = await container.pipeline.process(audio, session_id=session_id)
 
             # Denied or non-conversational → single terminal message.
-            if not result.executed or result.intent is None or result.intent.category not in (
+            conversational = result.intent is not None and result.intent.category in (
                 ActionCategory.GENERAL_QUERY,
                 ActionCategory.EDUCATIONAL_QUERY,
-            ):
+            )
+            if not result.executed or not conversational:
                 await websocket.send_json(
                     {"type": "final", "text": result.spoken_response,
                      "authorized": result.authorized, "executed": result.executed}

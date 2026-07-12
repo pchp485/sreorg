@@ -16,7 +16,7 @@ boot without a database.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -94,7 +94,7 @@ class AuthService:
     # -- JWT ------------------------------------------------------------
     def issue_token(self, user_id: str) -> str:
         user = self._require(user_id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         payload = {
             "sub": user.id,
             "role": user.role.value,

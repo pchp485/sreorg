@@ -14,19 +14,25 @@ from app.domain.models import ActionCategory, Intent
 
 _NUMBER = re.compile(r"(\d+)")
 
-# Ordered rules: (regex, category, action, target-extractor)
+# Ordered rules: (regex, category, action). First match wins, so more specific
+# patterns (e.g. unlock before lock) are listed first.
+_H = ActionCategory.HOME_AUTOMATION
+_S = ActionCategory.SECURITY_ACTION
 _RULES: list[tuple[re.Pattern[str], ActionCategory, str]] = [
-    (re.compile(r"\block\b.*\bunlock|unlock\b"), ActionCategory.SECURITY_ACTION, "unlock"),
-    (re.compile(r"\block\b"), ActionCategory.SECURITY_ACTION, "lock"),
-    (re.compile(r"\bopen\b.*\bgarage|garage.*\bopen"), ActionCategory.SECURITY_ACTION, "open"),
-    (re.compile(r"\bclose\b.*\bgarage|garage.*\bclose"), ActionCategory.SECURITY_ACTION, "close"),
-    (re.compile(r"\barm\b|\bdisarm\b|\balarm\b"), ActionCategory.SECURITY_ACTION, "arm"),
-    (re.compile(r"\bbuy\b|\border\b|\bpurchase\b|\badd .*to .*cart"), ActionCategory.PURCHASE, "purchase"),
-    (re.compile(r"\bturn off\b|\bswitch off\b"), ActionCategory.HOME_AUTOMATION, "turn_off"),
-    (re.compile(r"\bturn on\b|\bswitch on\b"), ActionCategory.HOME_AUTOMATION, "turn_on"),
-    (re.compile(r"\bset\b.*\b(ac|a/c|thermostat|temperature|heat|cooling)\b"), ActionCategory.HOME_AUTOMATION, "set_temperature"),
-    (re.compile(r"\bdim\b|\bbrightness\b"), ActionCategory.HOME_AUTOMATION, "set_brightness"),
-    (re.compile(r"\bwhy\b|\bwhat is\b|\bhow do|\bexplain\b|\bteach\b|\bhelp me with my homework\b"), ActionCategory.EDUCATIONAL_QUERY, "answer"),
+    (re.compile(r"\block\b.*\bunlock|unlock\b"), _S, "unlock"),
+    (re.compile(r"\block\b"), _S, "lock"),
+    (re.compile(r"\bopen\b.*\bgarage|garage.*\bopen"), _S, "open"),
+    (re.compile(r"\bclose\b.*\bgarage|garage.*\bclose"), _S, "close"),
+    (re.compile(r"\barm\b|\bdisarm\b|\balarm\b"), _S, "arm"),
+    (re.compile(r"\bbuy\b|\border\b|\bpurchase\b|\badd .*to .*cart"),
+     ActionCategory.PURCHASE, "purchase"),
+    (re.compile(r"\bturn off\b|\bswitch off\b"), _H, "turn_off"),
+    (re.compile(r"\bturn on\b|\bswitch on\b"), _H, "turn_on"),
+    (re.compile(r"\bset\b.*\b(ac|a/c|thermostat|temperature|heat|cooling)\b"),
+     _H, "set_temperature"),
+    (re.compile(r"\bdim\b|\bbrightness\b"), _H, "set_brightness"),
+    (re.compile(r"\bwhy\b|\bwhat is\b|\bhow do|\bexplain\b|\bteach\b|\bhomework\b"),
+     ActionCategory.EDUCATIONAL_QUERY, "answer"),
 ]
 
 

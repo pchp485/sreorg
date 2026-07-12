@@ -40,7 +40,13 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "PL"]
-ignore = ["PLR2004", "PLR0913"]
+ignore = [
+    "PLR2004", # magic values — noisy for thresholds/status codes
+    "PLR0913", # many arguments — the pipeline/DI legitimately needs them
+    "PLC0415", # non-top-level import — intentional for optional/lazy deps
+    "B008",    # function call in default arg — FastAPI Depends()/File() idiom
+    "UP042",   # StrEnum — we keep (str, Enum) for broad compatibility
+]
 
 [tool.mypy]
 python_version = "3.11"

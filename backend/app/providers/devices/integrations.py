@@ -76,7 +76,9 @@ class KasaProvider(DeviceProvider):
         try:
             import kasa  # noqa: F401, PLC0415 (optional dep)
         except ImportError as exc:  # pragma: no cover - optional dep
-            raise ProviderError("python-kasa not installed. `pip install python-kasa`.") from exc
+            raise ProviderError(
+                "python-kasa not installed. `pip install python-kasa`."
+            ) from exc
         self._devices: dict[str, Any] = {}
 
     async def _discover(self) -> dict[str, Any]:
@@ -125,7 +127,9 @@ class MqttProvider(DeviceProvider):
         try:
             import paho.mqtt.publish  # noqa: F401, PLC0415 (optional dep)
         except ImportError as exc:  # pragma: no cover - optional dep
-            raise ProviderError("paho-mqtt not installed. `pip install paho-mqtt`.") from exc
+            raise ProviderError(
+                "paho-mqtt not installed. `pip install paho-mqtt`."
+            ) from exc
 
     async def supports(self, command: DeviceCommand) -> bool:
         return bool(command.target)
@@ -133,7 +137,7 @@ class MqttProvider(DeviceProvider):
     async def execute(self, command: DeviceCommand) -> dict[str, Any]:
         import asyncio
 
-        import paho.mqtt.publish as publish  # noqa: PLC0415
+        from paho.mqtt import publish  # noqa: PLC0415
 
         topic = f"parentai/{command.domain}/{command.target}/set"
         payload = json.dumps({"service": command.service, **command.data})
@@ -175,7 +179,11 @@ class AwsIotProvider(DeviceProvider):
                 json={"state": {"desired": desired}},
                 headers={"Authorization": f"AWS4 {creds.access_key}"},
             )
-        return {"provider": self.name, "status": resp.status_code, "target": command.target}
+        return {
+            "provider": self.name,
+            "status": resp.status_code,
+            "target": command.target,
+        }
 
     async def list_devices(self) -> list[dict[str, Any]]:  # pragma: no cover
         return []
