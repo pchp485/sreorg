@@ -1,0 +1,83 @@
+# ParentAI local/dev stack.
+#
+# `docker compose up` brings up the backend (api-gateway + all service modules),
+# PostgreSQL, Redis, and the observability stack (Prometheus, Grafana). The
+# backend runs fully with local/mock providers out of the box; set the relevant
+# PARENTAI_* variables (see .env.example) to enable cloud providers.
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      PARENTAI_ENVIRONMENT: dev
+      PARENTAI_DATABASE_URL: postgresql+asyncpg://parentai:parentai@postgres:5432/parentai
+      PARENTAI_REDIS_URL: redis://redis:6379/0
+      PARENTAI_SPEAKER_PROVIDER: ${PARENTAI_SPEAKER_PROVIDER:-mock}
+      PARENTAI_LLM_PROVIDER: ${PARENTAI_LLM_PROVIDER:-mock}
+      PARENTAI_JWT_SECRET: ${PARENTAI_JWT_SECRET:-dev-secret-change-me-in-production-32b}
+      PARENTAI_OPENAI_API_KEY: ${PARENTAI_OPENAI_API_KEY:-}
+      PARENTAI_AZURE_SPEECH_KEY: ${PARENTAI_AZURE_SPEECH_KEY:-}
+      PARENTAI_AZURE_SPEECH_REGION: ${PARENTAI_AZURE_SPEECH_REGION:-}
+      PARENTAI_ELEVENLABS_API_KEY: ${PARENTAI_ELEVENLABS_API_KEY:-}
+      PARENTAI_HOME_ASSISTANT_URL: ${PARENTAI_HOME_ASSISTANT_URL:-}
+      PARENTAI_HOME_ASSISTANT_TOKEN: ${PARENTAI_HOME_ASSISTANT_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: parentai
+      POSTGRES_PASSWORD: parentai
+      POSTGRES_DB: parentai
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parentai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  pgdata:

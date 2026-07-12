@@ -1,0 +1,11 @@
+# Core runtime dependencies (the system runs fully with just these, using
+# local/mock providers). Enable cloud providers via the extras in
+# pyproject.toml, e.g. `pip install -e .[openai,whisper,speaker]`.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+pydantic-settings>=2.2
+httpx>=0.27
+python-multipart>=0.0.9
+pyjwt>=2.8
+prometheus-client>=0.20
