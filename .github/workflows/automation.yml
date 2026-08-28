@@ -1,0 +1,47 @@
+name: Product automation
+
+# The product loops — the work customers pay to have happen without them.
+# Each runs independently so one failure cannot silence the others.
+on:
+  schedule:
+    - cron: "0 3 * * *"    # 08:30 IST daily — dunning and compliance reminders
+    - cron: "30 1 1 * *"   # 07:00 IST on the 1st — payslips
+  workflow_dispatch:
+
+concurrency:
+  group: automation
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+      OPERATOR_EMAIL: ${{ secrets.OPERATOR_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+
+      - name: Invoice dunning
+        if: github.event.schedule != '30 1 1 * *'
+        env:
+          APP_URL: ${{ vars.INVOICING_URL }}
+        run: npm run dunning
+
+      - name: Compliance reminders
+        if: github.event.schedule != '30 1 1 * *'
+        env:
+          APP_URL: ${{ vars.COMPLIANCE_URL }}
+        run: npm run compliance:run
+
+      - name: Monthly payslips
+        if: github.event.schedule == '30 1 1 * *' || github.event_name == 'workflow_dispatch'
+        env:
+          APP_URL: ${{ vars.PAYROLL_URL }}
+        run: npm run payroll:run

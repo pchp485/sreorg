@@ -1,0 +1,25 @@
+name: Portfolio report
+
+# 09:00 IST every Monday. One email: MRR against target, and a SCALE / FIX /
+# HOLD / KILL verdict per product against thresholds fixed in advance.
+on:
+  schedule:
+    - cron: "30 3 * * 1"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run portfolio
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+          OPERATOR_EMAIL: ${{ secrets.OPERATOR_EMAIL }}
