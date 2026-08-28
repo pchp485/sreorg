@@ -8,12 +8,14 @@ Everything the machine cannot do for you, in the order it needs doing.
 
 **Runs without you, forever:**
 
-- Billing and renewal (Razorpay charges the card every month)
-- Granting and revoking access when payment succeeds or fails
-- Chasing every overdue invoice on behalf of every paying customer
-- Publishing ~1,000 long-tail pages and keeping the sitemap current
+- Billing and renewal across all three products (Razorpay charges the card monthly)
+- Granting and revoking access when payment succeeds or fails, per product
+- Chasing every overdue invoice for every invoicing customer
+- Generating and emailing every payslip on the 1st for every payroll customer
+- Reminding every compliance customer a week before each deadline that is theirs
+- Publishing ~1,600 long-tail pages and keeping three sitemaps current
 - Drafting new content each week, aimed at the pages closest to converting
-- Telling you, weekly, exactly how far you are from ₹30,000
+- Telling you weekly how far you are from ₹30,000 — and which product to kill
 
 **Cannot be automated, and pretending otherwise is how people lose a year:**
 
@@ -22,9 +24,17 @@ Everything the machine cannot do for you, in the order it needs doing.
 - **The first ten customers.** No content engine produces revenue in week one.
   SEO takes 3–6 months to compound. Your first ten come from you posting in the
   places Indian freelancers already are, and talking to people.
+- **Deciding what to launch when.** Do not deploy all three at once. The
+  sequencing in `docs/PORTFOLIO.md` exists because three simultaneous
+  unvalidated products is the most common way this fails.
+- **Obeying the KILL verdict.** The Monday report will eventually tell you to
+  shut down something you like. No code can make you do it.
 - **Deciding the content is correct.** The growth engine opens a PR; it does not
   merge one. This is tax content — a wrong TDS rate costs a reader money and costs
   you the ranking. Two minutes a week of actually reading it.
+- **Verifying the statutory rates every February.** `packages/tax-india/src/rates/`
+  carries slabs, ceilings and professional-tax tables with a review checklist and
+  a last-verified date. The Budget changes them; nothing here can notice that.
 - **Support email.** Roughly one message per ten customers per month.
 
 Expect **20–30 minutes a week** once it is running. Not zero. Small.
@@ -33,7 +43,8 @@ Expect **20–30 minutes a week** once it is running. Not zero. Small.
 
 ## Part 1 — Accounts (one evening)
 
-1. **Domain** — any registrar, ~₹900/year. The only money you spend before revenue.
+1. **Domain** — one per product eventually, but buy only the first one now.
+   ~₹900/year each. The only money you spend before revenue.
 2. **GitHub** — this repo. All four cron jobs run here, free.
 3. **Neon** (neon.tech) — free Postgres. Copy the connection string.
 4. **Vercel** (or Cloudflare Pages) — connect the repo. Free tier.
@@ -81,7 +92,8 @@ Set these in Vercel (Environment Variables) **and** in GitHub
 | `APP_URL` | variable | `https://yourdomain.com` |
 | `RAZORPAY_KEY_ID` / `_KEY_SECRET` | secret | |
 | `RAZORPAY_WEBHOOK_SECRET` | secret | |
-| `RAZORPAY_PLAN_ID_PRO_MONTHLY` / `_YEARLY` | secret | |
+| `RZP_PLAN_*` (six of them) | secret | see the table in Part 2 |
+| `INVOICING_URL` / `PAYROLL_URL` / `COMPLIANCE_URL` | variable | used by the cron jobs |
 | `RESEND_API_KEY` | secret | |
 | `EMAIL_FROM` | variable | `Invoices <billing@yourdomain.com>` |
 | `OPERATOR_EMAIL` | secret | where the weekly KPI mail goes |
@@ -93,9 +105,12 @@ Then:
 npm run db:push
 ```
 
-Submit `https://yourdomain.com/sitemap.xml` to Google Search Console. This is the
-single highest-leverage five minutes in the whole runbook — it is how ~1,000 pages
+Submit each deployed app's `/sitemap.xml` to Google Search Console. This is the
+single highest-leverage five minutes in the whole runbook — it is how ~1,600 pages
 get discovered without a single backlink.
+
+**Deploy invoicing only, to begin with.** `docs/PORTFOLIO.md` explains why, and
+when to add the other two.
 
 ---
 
@@ -121,8 +136,8 @@ ten to seventy-six.
 
 ## Part 5 — The weekly loop
 
-Every Monday you get one email: MRR against ₹30,000, and which pages produced
-paying customers.
+Every Monday you get one email: MRR against ₹30,000, a SCALE / FIX / HOLD / KILL
+verdict for each product, and the single product to spend this month on.
 
 1. **Merge or reject the growth PR.** Read every number in it. Wrong SAC code or
    TDS rate → reject, do not "fix later".
@@ -131,6 +146,9 @@ paying customers.
    action *before* writing anything new.
 3. **Write more like the winners.** The engine already prioritises this; you are
    sanity-checking it.
+4. **Act on the verdict.** SCALE means put every hour there. FIX means stop
+   writing pages and fix the offer. KILL means shut it down this week — the
+   thresholds were set before you were attached to it.
 
 ---
 

@@ -1,8 +1,8 @@
 name: Growth engine
 
-# The acquisition loop. Drafts new page content weekly and opens a PR.
-# It never publishes directly: this is tax content, and a wrong number costs
-# a reader money and the site its rankings. Review takes about two minutes.
+# The acquisition loop, across every product with a content spec. It drafts and
+# opens a pull request; it never publishes. This is tax content, and a wrong
+# number costs a reader money and costs the site its rankings.
 on:
   schedule:
     - cron: "0 4 * * 1"
@@ -15,13 +15,11 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+        with: { node-version: 22, cache: npm }
       - run: npm ci
 
       - name: Draft new content
@@ -31,14 +29,14 @@ jobs:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
-      - name: Verify the site still builds with the new content
+      - name: Verify everything still typechecks and passes
         run: npm run typecheck && npm test
 
       - name: Open review PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if git diff --quiet -- src/content/generated/; then
+          if git diff --quiet -- 'apps/*/src/content/generated/'; then
             echo "No new content this cycle."
             exit 0
           fi
@@ -46,10 +44,10 @@ jobs:
           git config user.name "growth-engine"
           git config user.email "growth-engine@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add src/content/generated/
+          git add 'apps/*/src/content/generated/'
           git commit -m "content: weekly FAQ batch"
           git push -u origin "$BRANCH"
           gh pr create \
             --title "Weekly content batch $(date +%Y-%m-%d)" \
-            --body "Drafted by the growth engine. **Check every number against the law before merging** — SAC codes, GST rates, TDS sections and thresholds." \
+            --body "Drafted by the growth engine. **Check every number against the law before merging** — SAC codes, GST rates, TDS sections, thresholds and salary figures." \
             --base main

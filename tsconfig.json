@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "ES2022"],
-    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -14,8 +13,18 @@
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./src/*"] }
+    "baseUrl": ".",
+    "paths": {
+      "@sreorg/core": ["./packages/core/src/index.ts"],
+      "@sreorg/core/*": ["./packages/core/src/*"],
+      "@sreorg/tax-india": ["./packages/tax-india/src/index.ts"],
+      "@sreorg/tax-india/*": ["./packages/tax-india/src/*"],
+      "@sreorg/growth": ["./packages/growth/src/index.ts"],
+      "@sreorg/growth/*": ["./packages/growth/src/*"],
+      "@sreorg/ui": ["./packages/ui/src/index.ts"],
+      "@sreorg/ui/*": ["./packages/ui/src/*"]
+    }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["**/*.ts", "**/*.tsx", "apps/*/.next/types/**/*.ts"],
+  "exclude": ["node_modules", "**/.next"]
 }

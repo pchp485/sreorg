@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { computeGst, computeTds, isIntraState, validateGstin, type LineItem } from "@/lib/gst";
-import { formatINR, roundToNearestRupee, rupeesToPaise } from "@/lib/money";
+import { computeGst, computeTds, isIntraState, validateGstin, type LineItem } from "@sreorg/tax-india";
+import { formatINR, roundToNearestRupee, rupeesToPaise } from "@sreorg/core";
 
 const item = (rupees: number, rate: LineItem["gstRate"], qty = 1): LineItem => ({
   description: "svc", hsnSac: "998314", quantity: qty, unitPricePaise: rupeesToPaise(rupees), gstRate: rate,
@@ -40,7 +40,7 @@ describe("tax arithmetic", () => {
   it("groups by rate slab rather than per line", () => {
     const r = computeGst([item(100, 18), item(100, 18), item(100, 5)], "29", "27");
     expect(r.byRate).toHaveLength(2);
-    const eighteen = r.byRate.find((b) => b.rate === 18)!;
+    const eighteen = r.byRate.find((b: { rate: number }) => b.rate === 18)!;
     expect(eighteen.taxablePaise).toBe(20000);
     expect(eighteen.igst).toBe(3600);
   });

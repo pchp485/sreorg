@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { allPseoPages, buildPseoPage, PROFESSIONS, STATES, slugify } from "@/content/pseo";
-import { validateGstin } from "@/lib/gst";
+import { allPseoPages, buildPseoPage, PROFESSIONS, STATES, slugify } from "../apps/invoicing/src/content/pseo";
+import { validateGstin } from "@sreorg/tax-india";
 
 describe("programmatic SEO surface", () => {
   it("generates a page for every profession and state", () => {

@@ -1,89 +1,89 @@
-# sreorg — an autonomous recurring-revenue system
+# sreorg — a portfolio of small Indian-compliance SaaS products
 
-A GST invoicing product for Indian freelancers, built so that the parts which
-normally need a human — chasing payment, publishing content, collecting money —
-run on their own.
+Three products for Indian freelancers and small businesses, sharing one billing,
+automation and growth engine, settling into one Indian bank account.
 
-**Target: ₹30,000/month recurring, settled into an Indian bank account.**
-At ₹399/month that is **76 paying subscribers**. Not a hundred thousand. Seventy-six.
+**Target: ₹30,000/month recurring.** Roughly 30 invoicing + 20 payroll + 20
+compliance customers — about 70 people, not seventy thousand.
 
 ## Read this first
 
 Software cannot create revenue. It can only run a business that has a product
-people want and a channel that reaches them. Everything below automates the
-*operating* of that business; the things it cannot automate are listed honestly
-in [`RUNBOOK.md`](./RUNBOOK.md), and they are the parts that decide whether this
-works.
+people want and a channel that reaches them. Everything here automates the
+*operating* of that business. What it cannot do is listed honestly in
+[`RUNBOOK.md`](./RUNBOOK.md), and those parts decide whether this works.
 
-Anything that promises autonomous, guaranteed returns with no product and no
-customers is a scam. This is the opposite: a small, real business with the
-boring parts removed.
+Three products is also three times the surface area for one person. Read
+[`docs/PORTFOLIO.md`](./docs/PORTFOLIO.md) before launching anything — especially
+the sequencing rules and the kill criteria.
 
-## The three loops
+## The products
 
-| Loop | What it does | Cadence | Where |
+| Product | Price | Free tier | What the money buys |
 |---|---|---|---|
-| **Acquisition** | Drafts new long-tail pages for queries that already bring traffic but no customers, then opens a PR | Weekly | `.github/workflows/growth-engine.yml` |
-| **Product** | Chases every overdue invoice for paying customers on day 3, 7, 14 and 30 | Daily | `.github/workflows/dunning.yml` |
-| **Revenue** | Razorpay charges the card, the webhook grants access, money lands in your bank | Continuous | `src/app/api/webhooks/razorpay/route.ts` |
+| **invoicing** | ₹399/mo | GST calculators, 3 invoices/month | Chases every overdue invoice on day 3, 7, 14, 30 |
+| **payroll** | ₹499/mo | In-hand salary calculator, 2 employees | Generates and emails every payslip on the 1st |
+| **compliance** | ₹199/mo | Full deadline calendar | Emails you a week before each deadline that is yours |
 
-A fourth job emails you one weekly number: MRR against the ₹30,000 target, and
-which pages produced paying customers.
+Each free tier is genuinely usable. What you buy in every case is *automation* —
+work that happens while the customer sleeps, which is why the subscription
+renews instead of churning in month two.
 
-## Why this product
+## The loops
 
-The paid feature is *automatic follow-up on unpaid invoices*. It works because:
-
-- **The pain is measurable.** Indian freelancers routinely wait 45+ days to be paid,
-  mostly because nobody follows up. One invoice paid two weeks sooner pays for a year.
-- **The chasing is unpleasant**, so humans skip it. A machine does not mind.
-- **It runs while the customer sleeps**, which is exactly what makes a subscription renew
-  instead of churning after month one.
-- **The free tools rank.** ~1,000 long-tail pages ("gst invoice format for freelance
-  designers in karnataka") generated from two small lists, at zero marginal cost.
-
-## Stack, and what it costs
-
-| Piece | Choice | Cost at 76 customers |
+| Loop | What it does | Cadence |
 |---|---|---|
-| Hosting | Vercel / Cloudflare free tier | ₹0 |
-| Database | Neon free tier (Postgres) | ₹0 |
-| Email | Resend free tier, 3k/month | ₹0 |
-| Cron | GitHub Actions | ₹0 |
-| Payments | Razorpay | 2% + GST on collections |
-| Content drafting | Anthropic API | ~₹100–300/month |
-| Domain | any registrar | ~₹900/year |
-
-**Total upfront: the price of a domain.** Everything else stays free until you
-have paying customers, and the only cost that scales is the payment fee.
-
-## Getting it running
-
-```bash
-npm install
-cp .env.example .env       # fill in the values named in RUNBOOK.md
-npm run db:push            # create the schema
-npm run dev
-```
-
-```bash
-npm test          # 36 tests: GST arithmetic, webhook signatures, dunning schedule
-npm run typecheck
-npm run build
-```
+| **Acquisition** | ~1,600 long-tail pages, plus a weekly job that drafts content for pages with traffic but no customers | Weekly |
+| **Product** | Dunning daily, compliance reminders daily, payslips on the 1st | Daily / monthly |
+| **Revenue** | Razorpay subscriptions → T+2 settlement to an Indian bank account | Continuous |
+| **Judgement** | SCALE / FIX / HOLD / KILL verdict per product, against thresholds fixed in advance | Weekly |
 
 ## Layout
 
 ```
-src/lib/gst.ts             GST/TDS engine — slab-wise tax, GSTIN checksum, Sec 170 rounding
-src/lib/razorpay.ts        Subscriptions + HMAC webhook verification
-src/lib/entitlements.ts    Free vs Pro; Razorpay is the only source of truth
-src/content/pseo.ts        Professions x states -> ~1,000 pages
-src/app/api/webhooks/      The money path. Signature-verified and idempotent.
-scripts/dunning-engine.ts  The product loop
-scripts/growth-engine.ts   The acquisition loop (drafts, never publishes)
-scripts/kpi-report.ts      The instrument panel
+packages/core         billing, entitlements, auth, email, analytics, shared HTTP handlers
+packages/tax-india    GST, TDS, payroll statutory maths, compliance calendar
+packages/growth       programmatic-SEO helpers and the content drafting engine
+packages/ui           shared checkout, chrome and styles
+apps/invoicing        GST invoicing + dunning
+apps/payroll          salary calculator + monthly payslips
+apps/compliance       deadline calendar + reminders
+scripts/portfolio-report.ts   MRR, per-product verdicts, and what to work on this month
 ```
 
-See [`RUNBOOK.md`](./RUNBOOK.md) for launch steps and
-[`docs/UNIT-ECONOMICS.md`](./docs/UNIT-ECONOMICS.md) for the arithmetic behind ₹30,000.
+Adding a fourth product is a row in `packages/core/src/products.ts`, a free tool,
+and an automation script. Days, not months — that is the whole point of the
+shared engine.
+
+## Two design decisions worth knowing
+
+**Razorpay is the only thing that can grant access.** One webhook, shared by all
+three apps, signature-verified against the raw body and deduped on the event id.
+Nothing else in the codebase may set a subscription active.
+
+**Statutory rates are data, not code.** `packages/tax-india/src/rates/` is a
+versioned, human-verified file with a review date. The engine that consumes it is
+provably correct and unit-tested; the numbers are only as correct as the last
+person who checked them against the Finance Act. Where a state's rules have not
+been verified, the payslip *warns* rather than silently deducting zero.
+
+## Running it
+
+```bash
+npm install
+cp .env.example .env
+npm run db:push
+
+cd apps/invoicing && npm run dev     # or payroll, or compliance
+```
+
+```bash
+npm run typecheck   # whole monorepo
+npm test            # 80 tests
+npm run build       # all three apps
+npm run portfolio   # the Monday report, on demand
+```
+
+See [`RUNBOOK.md`](./RUNBOOK.md) to launch,
+[`docs/PORTFOLIO.md`](./docs/PORTFOLIO.md) for sequencing and kill criteria, and
+[`docs/UNIT-ECONOMICS.md`](./docs/UNIT-ECONOMICS.md) for the arithmetic.

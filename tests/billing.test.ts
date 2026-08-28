@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { verifyWebhookSignature, PLANS } from "@/lib/razorpay";
-import { nextStep } from "../scripts/dunning-engine";
+import { verifyWebhookSignature, PRODUCTS, monthlyEquivalentPaise } from "@sreorg/core";
+import { nextStep } from "../apps/invoicing/scripts/dunning-engine";
 
 const SECRET = "whsec_test_secret";
 const sign = (body: string) => createHmac("sha256", SECRET).update(body).digest("hex");
@@ -57,12 +57,28 @@ describe("dunning schedule", () => {
   });
 });
 
-describe("pricing", () => {
-  it("prices yearly at ten months of monthly", () => {
-    expect(PLANS.pro_yearly.amountPaise).toBe(PLANS.pro_monthly.amountPaise * 10);
+describe("portfolio pricing", () => {
+  it("prices every yearly plan at ten months of its monthly plan", () => {
+    for (const product of Object.values(PRODUCTS)) {
+      const [monthly, yearly] = product.plans;
+      expect(yearly.amountPaise).toBe(monthly.amountPaise * 10);
+    }
   });
 
-  it("needs 76 subscribers to clear ₹30,000 MRR", () => {
-    expect(Math.ceil(3_000_000 / PLANS.pro_monthly.amountPaise)).toBe(76);
+  it("normalises yearly plans into a comparable monthly figure", () => {
+    const [monthly, yearly] = PRODUCTS.invoicing.plans;
+    expect(monthlyEquivalentPaise(monthly)).toBe(monthly.amountPaise);
+    // Ten months of price spread over twelve months of service.
+    expect(monthlyEquivalentPaise(yearly)).toBe(Math.round(monthly.amountPaise * 10 / 12));
+  });
+
+  it("needs 76 invoicing subscribers, or 61 payroll ones, to clear ₹30,000 MRR", () => {
+    expect(Math.ceil(3_000_000 / PRODUCTS.invoicing.plans[0].amountPaise)).toBe(76);
+    expect(Math.ceil(3_000_000 / PRODUCTS.payroll.plans[0].amountPaise)).toBe(61);
+  });
+
+  it("gives every plan a distinct code, so a webhook can never credit the wrong product", () => {
+    const codes = Object.values(PRODUCTS).flatMap((p) => p.plans.map((pl) => pl.code));
+    expect(new Set(codes).size).toBe(codes.length);
   });
 });

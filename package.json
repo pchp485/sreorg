@@ -1,19 +1,20 @@
 {
   "name": "sreorg",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Autonomous recurring-revenue system: GST invoicing SaaS for Indian freelancers, with self-running acquisition and dunning loops.",
+  "description": "A portfolio of small Indian-compliance SaaS products sharing one billing, automation and growth engine.",
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "build": "npm run build --workspaces --if-present",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
+    "portfolio": "tsx scripts/portfolio-report.ts",
     "growth": "tsx scripts/growth-engine.ts",
-    "dunning": "tsx scripts/dunning-engine.ts",
-    "kpi": "tsx scripts/kpi-report.ts"
+    "dunning": "tsx apps/invoicing/scripts/dunning-engine.ts",
+    "payroll:run": "tsx apps/payroll/scripts/payroll-engine.ts",
+    "compliance:run": "tsx apps/compliance/scripts/reminder-engine.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
