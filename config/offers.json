@@ -1,0 +1,61 @@
+{
+  "_comment": [
+    "The offer ladder. Every rung is derived from something already built or",
+    "already known - nothing here needs a new skill acquired first.",
+    "",
+    "Ladder logic: the cheap digital rungs earn while nobody is awake but",
+    "convert slowly; the service rungs pay properly but consume evenings.",
+    "The subscription rung is the only one that makes revenue 'constant'.",
+    "Run `revenue plan` to see which mix actually closes the gap."
+  ],
+  "offers": [
+    {
+      "slug": "section-ops-kit",
+      "name": "Section & Chapter Event Automation Kit",
+      "kind": "digital",
+      "price_paise": 149900,
+      "delivery_hours": 0.0,
+      "monthly_capacity": null,
+      "unit_cost_paise": 0,
+      "deliverable": "deliverables/section-ops-kit/",
+      "description": "The working pattern behind the IEEE Houston toolkit, packaged: the two-phase propose/publish design, the approval gate, the vTools/eNotice/WordPress field maps, the CLAUDE.md that makes an agent safe to hand a live account. Sold to the ~340 IEEE sections and several thousand chapters whose officers do this by hand.",
+      "active": true
+    },
+    {
+      "slug": "agent-ops-playbook",
+      "name": "Agentic Ops Playbook: automating systems with no API",
+      "kind": "digital",
+      "price_paise": 399900,
+      "delivery_hours": 0.0,
+      "monthly_capacity": null,
+      "unit_cost_paise": 0,
+      "deliverable": "deliverables/agent-ops-playbook/",
+      "description": "The transferable version. How to put an agent in front of a legacy browser-bound system safely: calibration over hardcoded selectors, propose/publish phase separation, idempotent retries, refusing to act on missing data. Audience is ops and platform engineers, not IEEE.",
+      "active": true
+    },
+    {
+      "slug": "automation-teardown",
+      "name": "Automation Teardown (90 minutes, recorded)",
+      "kind": "service",
+      "price_paise": 999900,
+      "delivery_hours": 3.0,
+      "monthly_capacity": 4,
+      "unit_cost_paise": 0,
+      "deliverable": "deliverables/teardown-brief.md",
+      "description": "Live session on one manual workflow, followed by a written automation plan: what to automate, what to leave alone, the approval gates it needs, and the order to build it in. Caps at four a month because it costs three real hours each.",
+      "active": true
+    },
+    {
+      "slug": "managed-section-ops",
+      "name": "Managed Section Ops (per section, monthly)",
+      "kind": "subscription",
+      "price_paise": 699900,
+      "delivery_hours": 2.0,
+      "monthly_capacity": 8,
+      "unit_cost_paise": 0,
+      "deliverable": "deliverables/managed-onboarding.md",
+      "description": "The toolkit run as a service for one section or chapter: events proposed, drafts sent for approval, published on a yes, post-event reports filed. Approval always stays with the officer. This is the rung that turns lumpy income into constant income.",
+      "active": true
+    }
+  ]
+}

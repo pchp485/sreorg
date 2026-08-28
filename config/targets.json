@@ -1,0 +1,16 @@
+{
+  "_comment": "What 'done' means. Edit monthly_net_inr if the goal moves.",
+  "monthly_net_inr": 30000,
+  "currency": "INR",
+  "horizon_months": 6,
+  "stability_months": 3,
+
+  "_funnel_comment": "Baseline conversion assumptions. They are guesses until the events table has real numbers; `revenue plan` prefers measured rates the moment enough data exists.",
+  "assumed_visit_to_lead": 0.02,
+  "assumed_lead_to_sale_digital": 0.02,
+  "assumed_lead_to_sale_service": 0.05,
+  "assumed_monthly_churn": 0.05,
+
+  "_capacity_comment": "Hours a month genuinely available for delivery, after a day job. Be honest here; the planner refuses mixes that exceed it.",
+  "delivery_hours_per_month": 20
+}

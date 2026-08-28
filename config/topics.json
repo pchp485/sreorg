@@ -1,0 +1,73 @@
+{
+  "_comment": [
+    "The topic bank. Each entry must carry `proof` - a specific thing that was",
+    "actually built, measured or broken. Content without proof is filler and",
+    "converts at zero, however well it is written."
+  ],
+  "topics": [
+    {
+      "slug": "automating-a-system-with-no-api",
+      "title": "Automating a system that has no API, without it breaking every month",
+      "intent": "Has a legacy web tool to automate and knows Selenium scripts rot.",
+      "offer": "agent-ops-playbook",
+      "proof": "vTools has no write API; the toolkit uses a `calibrate` step that records real form fields instead of hardcoding selectors, which is why it survives IEEE's form changes.",
+      "keywords": ["browser automation", "no api", "playwright", "legacy system"]
+    },
+    {
+      "slug": "approval-gate-pattern-for-agents",
+      "title": "The approval gate: letting an agent touch a live account safely",
+      "intent": "Wants agent automation but is afraid it will publish something wrong.",
+      "offer": "agent-ops-playbook",
+      "proof": "Two-phase propose/publish, where phase one physically cannot reach a live system - it writes only to drafts/ and out/ - plus two independent flags off by default.",
+      "keywords": ["ai agent safety", "human in the loop", "claude code", "approval"]
+    },
+    {
+      "slug": "ieee-section-event-in-one-command",
+      "title": "Running an IEEE section event across four platforms from one command",
+      "intent": "An IEEE officer drowning in vTools, eNotice, WordPress and LinkedIn.",
+      "offer": "section-ops-kit",
+      "proof": "One command produces the vTools event, the eNotice, the website post and the LinkedIn copy with a generated flyer, for the Houston Section.",
+      "keywords": ["ieee vtools", "enotice", "section chair", "volunteer automation"]
+    },
+    {
+      "slug": "claude-md-that-prevents-mistakes",
+      "title": "Writing a CLAUDE.md that stops an agent doing the expensive thing",
+      "intent": "Uses Claude Code and wants the agent to respect real operational rules.",
+      "offer": "agent-ops-playbook",
+      "proof": "A rules file where the non-negotiables are enforced in code, not prose - publish refuses to run if the three required event contacts are missing.",
+      "keywords": ["claude.md", "claude code", "agent instructions", "guardrails"]
+    },
+    {
+      "slug": "what-i-refuse-to-automate",
+      "title": "What I refuse to automate, and why that list keeps getting longer",
+      "intent": "Deciding where the line is between useful automation and liability.",
+      "offer": "automation-teardown",
+      "proof": "eNotice goes out to the whole section list and cannot be recalled, so it is prepared and never auto-sent. LinkedIn browser automation breaches their user agreement and can get the page restricted.",
+      "keywords": ["automation limits", "ops risk", "email blast", "terms of service"]
+    },
+    {
+      "slug": "idempotent-webhooks-small-scale",
+      "title": "Handling payment webhooks correctly when you are one person",
+      "intent": "Building a small paid product and worried about double delivery.",
+      "offer": "agent-ops-playbook",
+      "proof": "HMAC verification with constant-time compare, the signature reused as the dedupe key, and a deliberate 500 on failure so the gateway retries.",
+      "keywords": ["razorpay webhook", "idempotency", "hmac", "payment integration"]
+    },
+    {
+      "slug": "volunteer-ops-burnout",
+      "title": "The volunteer ops problem: why professional societies run on unpaid evenings",
+      "intent": "A society officer wondering whether the workload is normal.",
+      "offer": "section-ops-kit",
+      "proof": "The concrete per-event task list across four platforms, and how much of it is genuinely mechanical.",
+      "keywords": ["ieee volunteer", "professional society", "chapter chair", "burnout"]
+    },
+    {
+      "slug": "github-actions-as-free-infrastructure",
+      "title": "Running a small business on GitHub Actions and nothing else",
+      "intent": "Wants automation running on a schedule without paying for a server.",
+      "offer": "agent-ops-playbook",
+      "proof": "Scheduled workflows as the runtime, secrets in Actions, SQLite as the database, and the specific point where this stops being sufficient.",
+      "keywords": ["github actions cron", "free hosting", "sqlite", "bootstrapping"]
+    }
+  ]
+}

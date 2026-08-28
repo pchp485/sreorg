@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "revenue-engine"
+version = "0.1.0"
+description = "The automatable half of a one-person business: offers, checkout, delivery, funnel and reporting"
+requires-python = ">=3.11"
+# Intentionally empty. Stdlib only, so it runs on a bare CI runner with no
+# install step and nothing to break on a dependency update.
+dependencies = []
+
+[project.scripts]
+revenue = "revenue.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

@@ -1,0 +1,44 @@
+name: Tests
+
+# The money math, the signature checks and the consent rules need a guard.
+# Nothing else in this repo runs on a pull request, so without this a change
+# to net_paise() or verify_webhook() would land unchallenged.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # No install step: the engine is stdlib-only, and this job failing on a
+      # dependency resolution would defeat the point of that choice.
+      - name: Unit tests
+        run: PYTHONPATH=src python -m unittest discover -s tests -v
+
+      - name: Read-only commands must work with no credentials
+        run: |
+          PYTHONPATH=src python -m revenue offers --json  > /dev/null
+          PYTHONPATH=src python -m revenue plan --json    > /dev/null
+          PYTHONPATH=src python -m revenue content plan --json > /dev/null
+
+      - name: No secrets committed
+        run: |
+          if git ls-files | grep -qxF '.env'; then
+            echo "::error::.env is tracked by git"; exit 1
+          fi
+          # Razorpay live keys are rzp_live_*; test keys are fine in examples.
+          if git grep -nE 'rzp_live_[A-Za-z0-9]+' -- . ; then
+            echo "::error::a live Razorpay key appears in the tree"; exit 1
+          fi
+          echo "clean"

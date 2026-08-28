@@ -1,0 +1,76 @@
+name: Daily Revenue Ops
+
+# The 24/7 part. Runs on GitHub's free tier, so the machine costs nothing
+# while it is still earning nothing.
+#
+# It does three things: sweep up any order the webhook failed to deliver,
+# publish the revenue snapshot to the run summary, and stay silent unless
+# something needs a human.
+
+on:
+  schedule:
+    - cron: "30 2 * * *"     # 08:00 IST
+  workflow_dispatch:
+    inputs:
+      live:
+        description: "Actually send delivery emails"
+        type: boolean
+        default: false
+
+jobs:
+  ops:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # No `pip install`. The engine is stdlib-only precisely so this step
+      # does not exist and cannot break.
+
+      - name: Restore state
+        uses: actions/cache@v4
+        with:
+          path: data/revenue.db
+          key: revenue-db-${{ github.run_id }}
+          restore-keys: revenue-db-
+
+      - name: Preflight
+        continue-on-error: true
+        env:
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+          RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          DELIVERY_BASE_URL: ${{ secrets.DELIVERY_BASE_URL }}
+        run: PYTHONPATH=src python -m revenue check
+
+      - name: Deliver anything the webhook missed
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          DELIVERY_BASE_URL: ${{ secrets.DELIVERY_BASE_URL }}
+        run: |
+          LIVE=""
+          if [ "${{ inputs.live }}" = "true" ]; then LIVE="--live"; fi
+          PYTHONPATH=src python -m revenue deliver $LIVE --json | tee sweep.json
+
+      - name: Snapshot to the run summary
+        run: |
+          {
+            echo '```'
+            PYTHONPATH=src python -m revenue status
+            echo '```'
+            echo
+            echo "### Undelivered sweep"
+            echo '```json'
+            cat sweep.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
