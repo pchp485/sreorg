@@ -1,0 +1,51 @@
+name: Content Engine
+
+# Drafts the next article from the topic bank and opens it as a PR.
+#
+# It writes a skeleton with the specific proof already filled in, not a
+# finished article. A wholly machine-written post is worth nothing now that
+# everyone has one; the value is the outline plus the evidence, completed by
+# the person who actually did the work.
+
+on:
+  schedule:
+    - cron: "30 3 * * 1"     # Mondays, 09:00 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Draft the next piece
+        id: draft
+        run: |
+          PYTHONPATH=src python -m revenue content draft --json | tee draft.json
+          echo "slug=$(python -c "import json;print(json.load(open('draft.json')).get('slug',''))")" >> "$GITHUB_OUTPUT"
+
+      - name: Open a PR with the draft
+        if: steps.draft.outputs.slug != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ steps.draft.outputs.slug }}
+        run: |
+          git config user.name  "content-engine"
+          git config user.email "noreply@github.com"
+          BRANCH="content/$SLUG"
+          git checkout -b "$BRANCH"
+          git add -f "out/content/$SLUG.md"
+          git commit -m "Draft: $SLUG"
+          git push -u origin "$BRANCH"
+          gh pr create --draft \
+            --title "Content draft: $SLUG" \
+            --body "Auto-drafted skeleton. Fill in the sections marked with HTML comments, especially the proof, then publish and mark it live with \`revenue content draft --live\`."
