@@ -156,9 +156,12 @@ def cmd_lead(args) -> int:
         from .store import list_leads
         rows = [{"email": l.email, "org": l.org, "stage": l.stage.value,
                  "consent": l.consent, "source": l.source} for l in list_leads()]
-        _out(rows, args.json) if args.json else [
-            print(f"  {r['email']:<34}{r['org'][:18]:<20}{r['stage']:<12}"
-                  f"{'opted-in' if r['consent'] else 'no consent'}") for r in rows]
+        if args.json:
+            _out(rows, True)
+        else:
+            for r in rows:
+                print(f"  {r['email']:<34}{r['org'][:18]:<20}{r['stage']:<12}"
+                      f"{'opted-in' if r['consent'] else 'no consent'}")
     elif args.action == "mailable":
         _out([l.email for l in mailable()], args.json)
     elif args.action == "draft":
@@ -178,9 +181,12 @@ def cmd_content(args) -> int:
 
     if args.action == "plan":
         rows = plan_content(weeks=args.weeks)
-        _out(rows, args.json) if args.json else [
-            print(f"  week {r['week']:>2}: {r['title']}\n            -> {r['offer']}")
-            for r in rows]
+        if args.json:
+            _out(rows, True)
+        else:
+            for r in rows:
+                print(f"  week {r['week']:>2}: {r['title']}")
+                print(f"            -> {r['offer']}")
     else:
         _out(generate(live=args.live), args.json)
     return 0

@@ -11,7 +11,7 @@ Two rules here:
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from .catalog import get_offer, load_offers
 from .config import Target
@@ -19,13 +19,13 @@ from .models import OfferKind, OrderStatus, rupees
 from .store import active_subscriptions, count_events, list_leads, list_orders
 
 
-def month_start(offset: int = 0) -> str:
-    d = datetime.now(timezone.utc).replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
+def month_start() -> str:
+    """Midnight UTC on the first of the current month."""
+    return (
+        datetime.now(timezone.utc)
+        .replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        .isoformat(timespec="seconds")
     )
-    for _ in range(abs(offset)):
-        d = (d - timedelta(days=1)).replace(day=1) if offset < 0 else d
-    return d.isoformat(timespec="seconds")
 
 
 def _offer_kind(slug: str) -> OfferKind:
